@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Avaliação - Banca Mecatrônica</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #3498db;
+            --secondary: #2c3e50;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --info: #17a2b8;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --gray: #95a5a6;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--secondary);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--gray);
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--light);
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            color: var(--secondary);
+        }
+        
+        .card-number {
+            background: var(--primary);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .rating-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .rating-title {
+            font-size: 1.2rem;
+            margin-bottom: 0.75rem;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .rating-title i {
+            color: var(--primary);
+        }
+        
+        .rating-description {
+            color: var(--gray);
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+        
+        .rating-options {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .rating-option {
+            flex: 1;
+            min-width: 110px;
+            text-align: center;
+            padding: 12px 8px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .rating-option:hover {
+            border-color: var(--primary);
+            background-color: rgba(52, 152, 219, 0.05);
+        }
+        
+        .rating-option.selected {
+            border-color: var(--primary);
+            background-color: rgba(52, 152, 219, 0.1);
+            color: var(--primary);
+            font-weight: bold;
+            transform: scale(1.05);
+        }
+        
+        .rating-value {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .rating-label {
+            font-size: 0.85rem;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            resize: vertical;
+            min-height: 100px;
+            font-size: 1rem;
+            transition: border 0.3s;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), #2980b9);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 15px rgba(52, 152, 219, 0.3);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, var(--success), #219653);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 15px rgba(39, 174, 96, 0.3);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+        
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+        
+        .progress-container {
+            margin: 2rem 0;
+        }
+        
+        .progress-bar {
+            height: 12px;
+            background-color: #e0e0e0;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary), #2980b9);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 6px;
+        }
+        
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 0.95rem;
+            color: white;
+        }
+        
+        .results-container {
+            display: none;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+            color: var(--primary);
+        }
+        
+        .stat-label {
+            color: var(--gray);
+            font-size: 1rem;
+        }
+        
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        .results-table th, .results-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .results-table th {
+            background-color: var(--light);
+            color: var(--dark);
+            font-weight: 600;
+        }
+        
+        .results-table tr:hover {
+            background-color: rgba(52, 152, 219, 0.05);
+        }
+        
+        .rank {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 0.9rem;
+        }
+        
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .notification.success {
+            background: linear-gradient(135deg, var(--success), #219653);
+        }
+        
+        .notification.error {
+            background: linear-gradient(135deg, var(--danger), #c0392b);
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 1.5rem;
+            background: white;
+            border-radius: 10px;
+            padding: 5px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+        .tab.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        }
+        
+        @media (max-width: 768px) {
+            .rating-options {
+                flex-direction: column;
+            }
+            
+            .rating-option {
+                min-width: 100%;
+            }
+            
+            .card {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .btn {
+                padding: 12px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-robot"></i> Avaliação de Apresentações</h1>
+            <p class="subtitle">Banca do Curso de Mecatrônica - 12 Grupos</p>
+        </header>
+        
+        <div class="tabs">
+            <div class="tab active" id="evaluation-tab">Avaliar Grupos</div>
+            <div class="tab" id="results-tab">Ver Resultados</div>
+        </div>
+        
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress" id="progress-bar"></div>
+            </div>
+            <div class="progress-text">
+                <span>Progresso: <span id="progress-text">0</span>/12</span>
+                <span id="current-group">Selecione um grupo para avaliar</span>
+            </div>
+        </div>
+        
+        <div id="evaluation-form">
+            <!-- Formulário será preenchido dinamicamente -->
+        </div>
+        
+        <div class="results-container" id="results-container">
+            <div class="dashboard">
+                <div class="stat-card">
+                    <div class="stat-label">Total de Avaliações</div>
+                    <div class="stat-value" id="total-evaluations">0</div>
+                    <div class="stat-label">Avaliadores Participantes</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-label">Melhor Avaliado</div>
+                    <div class="stat-value" id="best-group">-</div>
+                    <div class="stat-label" id="best-score">Nota: 0.0</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-label">Média Geral</div>
+                    <div class="stat-value" id="average-score">0.0</div>
+                    <div class="stat-label">de 5.0 pontos</div>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="results-chart"></canvas>
+            </div>
+            
+            <div class="card">
+                <h2 class="card-title">Resultados Detalhados</h2>
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th width="50">Pos.</th>
+                            <th>Grupo</th>
+                            <th>Projeto</th>
+                            <th width="120">Nota Média</th>
+                            <th width="120">Avaliações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="results-list">
+                        <!-- Resultados serão preenchidos dinamicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Sistema de Avaliação - Banca Mecatrônica | Total de avaliadores: <span id="total-voters">0</span></p>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <span id="notification-text">Notificação</span>
+    </div>
+    
+    <script>
+        // Dados dos grupos
+        const groups = [
+            { id: 1, name: "Cevitech", project: "Câmbio CVT" },
+            { id: 2, name: "TecMaq", project: "Reforma Router" },
+            { id: 3, name: "Automatize", project: "Automação Predial" },
+            { id: 4, name: "Coil Company", project: "Bobinadeira" },
+            { id: 5, name: "IN5", project: "Paquímetro Inclusivo" },
+            { id: 6, name: "RetroTech", project: "Reforma Dobradeira" },
+            { id: 7, name: "SelectPro", project: "Bobinadeira Molas" },
+            { id: 8, name: "TecnoArm", project: "Braço Robótico" },
+            { id: 9, name: "Mechatec Solutions", project: "Seleção de Ferramentas" },
+            { id: 10, name: "CyberTrace", project: "Plotter 2D" },
+            { id: 11, name: "A.R.P.E", project: "Linha de Manufatura Automatizada" },
+            { id: 12, name: "InnovaTech", project: "Organização e Controle de Qualidade por IA" }
+        ];
+        
+        // Critérios de avaliação
+        const criteria = [
+            { id: "clarity", name: "Clareza na Apresentação", description: "A apresentação foi clara e objetiva?", icon: "fas fa-bullhorn" },
+            { id: "technical", name: "Conteúdo Técnico", description: "O conteúdo técnico foi adequado e bem fundamentado?", icon: "fas fa-cogs" },
+            { id: "innovation", name: "Inovação", description: "O projeto apresenta elementos inovadores?", icon: "fas fa-lightbulb" },
+            { id: "viability", name: "Viabilidade", description: "O projeto é viável tecnicamente e economicamente?", icon: "fas fa-chart-line" },
+            { id: "presentation", name: "Qualidade da Apresentação", description: "A apresentação foi bem estruturada e organizada?", icon: "fas fa-desktop" }
+        ];
+        
+        // Opções de avaliação
+        const ratingOptions = [
+            { value: 1, label: "Insuficiente" },
+            { value: 2, label: "Regular" },
+            { value: 3, label: "Bom" },
+            { value: 4, label: "Muito Bom" },
+            { value: 5, label: "Excelente" }
+        ];
+        
+        // Estado da aplicação
+        let currentGroupIndex = 0;
+        let evaluations = {};
+        let allEvaluations = {};
+        let chart = null;
+        
+        // Simulação de um backend com localStorage
+        function saveEvaluationsToStorage() {
+            // Gerar um ID único para este avaliador
+            let voterId = localStorage.getItem('voterId');
+            if (!voterId) {
+                voterId = 'voter_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('voterId', voterId);
+            }
+            
+            // Salvar avaliações deste usuário
+            localStorage.setItem('evaluations_' + voterId, JSON.stringify(evaluations));
+            
+            // Atualizar contagem de avaliadores
+            updateVoterCount();
+        }
+        
+        function loadAllEvaluations() {
+            allEvaluations = {};
+            let voterCount = 0;
+            
+            // Coletar todas as avaliações de todos os usuários
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('evaluations_voter_')) {
+                    const voterEvaluations = JSON.parse(localStorage.getItem(key));
+                    
+                    // Processar avaliações deste votante
+                    for (const groupId in voterEvaluations) {
+                        if (!allEvaluations[groupId]) {
+                            allEvaluations[groupId] = [];
+                        }
+                        
+                        // Adicionar apenas as avaliações completas
+                        if (Object.keys(voterEvaluations[groupId]).length >= criteria.length) {
+                            allEvaluations[groupId].push(voterEvaluations[groupId]);
+                        }
+                    }
+                    
+                    voterCount++;
+                }
+            }
+            
+            document.getElementById('total-voters').textContent = voterCount;
+            return allEvaluations;
+        }
+        
+        function updateVoterCount() {
+            let voterCount = 0;
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('evaluations_voter_')) {
+                    voterCount++;
+                }
+            }
+            document.getElementById('total-voters').textContent = voterCount;
+        }
+        
+        // Inicializar a aplicação
+        document.addEventListener('DOMContentLoaded', function() {
+            // Carregar avaliações do usuário atual, se existirem
+            const voterId = localStorage.getItem('voterId');
+            if (voterId) {
+                evaluations = JSON.parse(localStorage.getItem('evaluations_' + voterId)) || {};
+            }
+            
+            updateVoterCount();
+            renderEvaluationForm();
+            setupEventListeners();
+        });
+        
+        function setupEventListeners() {
+            // Abas
+            document.getElementById('evaluation-tab').addEventListener('click', function() {
+                switchTab('evaluation');
+            });
+            
+            document.getElementById('results-tab').addEventListener('click', function() {
+                switchTab('results');
+            });
+        }
+        
+        function switchTab(tab) {
+            if (tab === 'evaluation') {
+                document.getElementById('evaluation-tab').classList.add('active');
+                document.getElementById('results-tab').classList.remove('active');
+                document.getElementById('evaluation-form').style.display = 'block';
+                document.getElementById('results-container').style.display = 'none';
+            } else {
+                document.getElementById('results-tab').classList.add('active');
+                document.getElementById('evaluation-tab').classList.remove('active');
+                document.getElementById('evaluation-form').style.display = 'none';
+                document.getElementById('results-container').style.display = 'block';
+                updateResults();
+            }
+        }
+        
+        // Renderizar o formulário de avaliação
+        function renderEvaluationForm() {
+            const formContainer = document.getElementById('evaluation-form');
+            const currentGroup = groups[currentGroupIndex];
+            
+            formContainer.innerHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">${currentGroup.name} - ${currentGroup.project}</h2>
+                        <div class="card-number">${currentGroupIndex + 1}</div>
+                    </div>
+                    
+                    <div id="evaluation-criteria">
+                        ${criteria.map(criterion => `
+                            <div class="rating-section">
+                                <h3 class="rating-title">
+                                    <i class="${criterion.icon}"></i>
+                                    ${criterion.name}
+                                </h3>
+                                <p class="rating-description">${criterion.description}</p>
+                                <div class="rating-options" data-criterion="${criterion.id}">
+                                    ${ratingOptions.map(option => `
+                                        <div class="rating-option" data-value="${option.value}">
+                                            <div class="rating-value">${option.value}</div>
+                                            <div class="rating-label">${option.label}</div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <div class="rating-section">
+                        <h3 class="rating-title">
+                            <i class="fas fa-comments"></i>
+                            Comentários Adicionais
+                        </h3>
+                        <textarea id="comments" placeholder="Digite seus comentários sobre esta apresentação..."></textarea>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
+                        ${currentGroupIndex > 0 ? 
+                            '<button class="btn btn-outline" id="prev-btn"><i class="fas fa-arrow-left"></i> Anterior</button>' : 
+                            '<div></div>'
+                        }
+                        <button class="btn btn-primary" id="next-btn" style="flex: 1;">
+                            ${currentGroupIndex < groups.length - 1 ? 
+                                'Próximo <i class="fas fa-arrow-right"></i>' : 
+                                'Finalizar Avaliação <i class="fas fa-check"></i>'
+                            }
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            updateProgress();
+            
+            // Adicionar eventos aos botões de avaliação
+            document.querySelectorAll('.rating-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const criterion = this.parentElement.getAttribute('data-criterion');
+                    const value = this.getAttribute('data-value');
+                    
+                    // Remover seleção anterior
+                    this.parentElement.querySelectorAll('.rating-option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    
+                    // Selecionar atual
+                    this.classList.add('selected');
+                    
+                    // Salvar avaliação
+                    if (!evaluations[currentGroup.id]) {
+                        evaluations[currentGroup.id] = {};
+                    }
+                    evaluations[currentGroup.id][criterion] = parseInt(value);
+                    
+                    // Salvar no localStorage
+                    saveEvaluationsToStorage();
+                });
+            });
+            
+            // Adicionar evento ao botão de próximo
+            document.getElementById('next-btn').addEventListener('click', function() {
+                // Verificar se todos os critérios foram avaliados
+                const groupEvaluation = evaluations[currentGroup.id];
+                if (!groupEvaluation || Object.keys(groupEvaluation).length < criteria.length) {
+                    showNotification('Por favor, avalie todos os critérios antes de continuar.', 'error');
+                    return;
+                }
+                
+                // Salvar comentários
+                const comments = document.getElementById('comments').value;
+                if (!evaluations[currentGroup.id]) {
+                    evaluations[currentGroup.id] = {};
+                }
+                evaluations[currentGroup.id].comments = comments;
+                saveEvaluationsToStorage();
+                
+                // Avançar para o próximo grupo ou finalizar
+                if (currentGroupIndex < groups.length - 1) {
+                    currentGroupIndex++;
+                    renderEvaluationForm();
+                } else {
+                    finalizeEvaluation();
+                }
+            });
+            
+            // Adicionar evento ao botão anterior (se existir)
+            const prevBtn = document.getElementById('prev-btn');
+            if (prevBtn) {
+                prevBtn.addEventListener('click', function() {
+                    currentGroupIndex--;
+                    renderEvaluationForm();
+                });
+            }
+            
+            // Carregar avaliações anteriores, se existirem
+            if (evaluations[currentGroup.id]) {
+                const groupEvaluation = evaluations[currentGroup.id];
+                
+                // Selecionar opções de avaliação
+                for (const criterion in groupEvaluation) {
+                    if (criterion !== 'comments') {
+                        const option = document.querySelector(`.rating-options[data-criterion="${criterion}"] .rating-option[data-value="${groupEvaluation[criterion]}"]`);
+                        if (option) {
+                            option.classList.add('selected');
+                        }
+                    }
+                }
+                
+                // Preencher comentários
+                if (groupEvaluation.comments) {
+                    document.getElementById('comments').value = groupEvaluation.comments;
+                }
+            }
+        }
+        
+        // Atualizar barra de progresso
+        function updateProgress() {
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            const currentGroupElement = document.getElementById('current-group');
+            
+            const progress = ((currentGroupIndex + 1) / groups.length) * 100;
+            progressBar.style.width = `${progress}%`;
+            progressText.textContent = currentGroupIndex + 1;
+            
+            const currentGroup = groups[currentGroupIndex];
+            currentGroupElement.textContent = `${currentGroup.name} - ${currentGroup.project}`;
+        }
+        
+        // Finalizar avaliação
+        function finalizeEvaluation() {
+            showNotification('Avaliação concluída com sucesso! Obrigado pela participação.', 'success');
+            switchTab('results');
+        }
+        
+        // Atualizar resultados
+        function updateResults() {
+            const allEvals = loadAllEvaluations();
+            let totalEvaluations = 0;
+            let totalScore = 0;
+            let groupCount = 0;
+            let bestGroup = null;
+            let bestScore = 0;
+            
+            const results = groups.map(group => {
+                const groupEvaluations = allEvals[group.id] || [];
+                let sum = 0;
+                let count = 0;
+                
+                groupEvaluations.forEach(evaluation => {
+                    for (const criterion in evaluation) {
+                        if (criterion !== 'comments' && !isNaN(evaluation[criterion])) {
+                            sum += evaluation[criterion];
+                            count++;
+                            totalScore += evaluation[criterion];
+                            totalEvaluations++;
+                        }
+                    }
+                });
+                
+                const average = count > 0 ? (sum / count).toFixed(2) : 0;
+                
+                if (parseFloat(average) > bestScore && count > 0) {
+                    bestScore = parseFloat(average);
+                    bestGroup = group.name;
+                }
+                
+                if (count > 0) groupCount++;
+                
+                return {
+                    name: group.name,
+                    project: group.project,
+                    average: average,
+                    evaluations: groupEvaluations.length
+                };
+            });
+            
+            // Ordenar por média (decrescente)
+            results.sort((a, b) => parseFloat(b.average) - parseFloat(a.average));
+            
+            // Atualizar estatísticas
+            document.getElementById('total-evaluations').textContent = totalEvaluations;
+            document.getElementById('best-group').textContent = bestGroup || '-';
+            document.getElementById('best-score').textContent = bestScore > 0 ? `Nota: ${bestScore.toFixed(2)}` : 'Sem avaliações';
+            document.getElementById('average-score').textContent = totalEvaluations > 0 ? (totalScore / totalEvaluations).toFixed(2) : '0.0';
+            
+            // Atualizar tabela de resultados
+            const resultsList = document.getElementById('results-list');
+            resultsList.innerHTML = results.map((result, index) => `
+                <tr>
+                    <td><span class="rank">${index + 1}</span></td>
+                    <td>${result.name}</td>
+                    <td>${result.project}</td>
+                    <td><strong>${result.average}</strong></td>
+                    <td>${result.evaluations}</td>
+                </tr>
+            `).join('');
+            
+            // Atualizar gráfico
+            updateChart(results);
+        }
+        
+        // Atualizar gráfico de resultados
+        function updateChart(results) {
+            const ctx = document.getElementById('results-chart').getContext('2d');
+            
+            // Destruir gráfico anterior se existir
+            if (chart) {
+                chart.destroy();
+            }
+            
+            // Preparar dados para o gráfico
+            const labels = results.map(r => r.name);
+            const data = results.map(r => parseFloat(r.average) || 0);
+            const evaluationCounts = results.map(r => r.evaluations);
+            
+            // Criar array de cores
+            const backgroundColors = data.map((value, index) => {
+                const hue = (index * 30) % 360;
+                return `hsla(${hue}, 70%, 60%, 0.7)`;
+            });
+            
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Nota Média',
+                        data: data,
+                        backgroundColor: backgroundColors,
+                        borderColor: backgroundColors.map(color => color.replace('0.7', '1')),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Notas Médias por Grupo',
+                            font: {
+                                size: 16
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                afterLabel: function(context) {
+                                    const index = context.dataIndex;
+                                    return `Avaliações: ${evaluationCounts[index]}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 5,
+                            ticks: {
+                                stepSize: 1
+                            },
+                            title: {
+                                display: true,
+                                text: 'Nota Média'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Grupos'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Mostrar notificação
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notification-text');
+            const icon = notification.querySelector('i');
+            
+            notificationText.textContent = message;
+            notification.className = `notification ${type}`;
+            
+            // Alterar ícone conforme o tipo
+            if (type === 'success') {
+                icon.className = 'fas fa-check-circle';
+            } else {
+                icon.className = 'fas fa-exclamation-circle';
+            }
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
+        }
+    </script>
+</body>
+</html>
