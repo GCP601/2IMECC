@@ -511,37 +511,235 @@
         }
         
         @media (max-width: 768px) {
-            .container {
+            body {
                 padding: 10px;
             }
             
+            .container {
+                padding: 0;
+            }
+            
+            header {
+                padding: 1.5rem;
+                border-radius: 12px;
+                margin-bottom: 1rem;
+            }
+            
             h1 {
-                font-size: 1.8rem;
+                font-size: 1.5rem;
+                margin-bottom: 0.3rem;
+            }
+            
+            .subtitle {
+                font-size: 0.9rem;
+            }
+            
+            .tabs {
+                border-radius: 12px;
+                margin-bottom: 1rem;
+                flex-wrap: nowrap;
+            }
+            
+            .tab {
+                padding: 0.75rem 0.5rem;
+                font-size: 0.85rem;
+                white-space: nowrap;
+            }
+            
+            .progress-section {
+                padding: 1rem;
+                border-radius: 12px;
+                margin-bottom: 1rem;
+            }
+            
+            .progress-info {
+                font-size: 0.85rem;
+            }
+            
+            .progress-count {
+                font-size: 1rem;
+            }
+            
+            .card {
+                padding: 1.25rem;
+                border-radius: 12px;
+                margin-bottom: 1rem;
+            }
+            
+            .group-header {
+                padding: 1.5rem 1rem;
+                margin-bottom: 1.5rem;
+                border-radius: 12px;
+            }
+            
+            .group-number {
+                font-size: 0.75rem;
+            }
+            
+            .group-name {
+                font-size: 1.4rem;
+                margin-bottom: 0.3rem;
+            }
+            
+            .group-project {
+                font-size: 0.95rem;
+            }
+            
+            .question-block {
+                margin-bottom: 1.5rem;
+                padding-bottom: 1.5rem;
+            }
+            
+            .question-number {
+                width: 28px;
+                height: 28px;
+                line-height: 28px;
+                font-size: 0.85rem;
+                margin-right: 8px;
+            }
+            
+            .question-title {
+                font-size: 1rem;
+                margin-bottom: 1rem;
+                line-height: 1.5;
             }
             
             .rating-buttons {
                 grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .rating-btn {
+                padding: 0.875rem;
+                font-size: 0.9rem;
             }
             
             .scale-container {
-                flex-wrap: wrap;
+                gap: 6px;
+                padding: 0;
+                justify-content: space-around;
             }
             
             .scale-number {
-                width: 45px;
-                height: 45px;
+                width: 42px;
+                height: 42px;
+                font-size: 1.1rem;
+            }
+            
+            .scale-labels {
+                font-size: 0.75rem;
+                margin-top: 6px;
             }
             
             .stars-container {
-                gap: 8px;
+                gap: 6px;
+                flex-wrap: wrap;
+                justify-content: center;
             }
             
             .star {
-                font-size: 2.5rem;
+                font-size: 2.2rem;
+            }
+            
+            textarea {
+                padding: 0.875rem;
+                font-size: 0.95rem;
+                min-height: 100px;
             }
             
             .action-buttons {
                 flex-direction: column;
+                gap: 0.75rem;
+                margin-top: 1.5rem;
+            }
+            
+            .btn {
+                padding: 0.875rem 1.5rem;
+                font-size: 0.95rem;
+                width: 100%;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .stat-card {
+                padding: 1.5rem;
+            }
+            
+            .stat-value {
+                font-size: 2rem;
+            }
+            
+            .stat-label {
+                font-size: 0.85rem;
+            }
+            
+            .chart-card {
+                padding: 1.25rem;
+            }
+            
+            .results-table {
+                font-size: 0.85rem;
+            }
+            
+            .results-table th,
+            .results-table td {
+                padding: 0.75rem 0.5rem;
+            }
+            
+            .rank {
+                font-size: 1.1rem;
+            }
+            
+            .suggestion-group-title {
+                font-size: 1.1rem;
+                flex-wrap: wrap;
+            }
+            
+            .suggestion-item {
+                padding: 0.875rem;
+            }
+            
+            .suggestion-text {
+                font-size: 0.9rem;
+            }
+            
+            .notification {
+                right: 10px;
+                left: 10px;
+                max-width: calc(100% - 20px);
+                font-size: 0.9rem;
+            }
+            
+            #debug-data {
+                font-size: 0.75rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.3rem;
+            }
+            
+            .group-name {
+                font-size: 1.2rem;
+            }
+            
+            .scale-number {
+                width: 38px;
+                height: 38px;
+                font-size: 1rem;
+            }
+            
+            .star {
+                font-size: 1.8rem;
+            }
+            
+            .results-table {
+                display: block;
+                overflow-x: auto;
             }
         }
     </style>
@@ -622,6 +820,18 @@
                     <i class="fas fa-comments"></i> Sugestões de Melhoria
                 </h2>
                 <div id="suggestions-list"></div>
+            </div>
+            
+            <div class="card" style="background: #f8f9fa; border: 2px solid #e9ecef;">
+                <h3 style="margin-bottom: 1rem; color: #495057;">
+                    <i class="fas fa-bug"></i> Debug - Dados do Sistema
+                </h3>
+                <div id="debug-data" style="font-family: monospace; font-size: 0.85rem; line-height: 1.8;">
+                    Carregando informações de debug...
+                </div>
+                <button class="btn btn-primary" onclick="forceReloadData()" style="margin-top: 1rem;">
+                    <i class="fas fa-sync"></i> Forçar Atualização dos Dados
+                </button>
             </div>
         </div>
     </div>
@@ -919,32 +1129,24 @@
                     currentGroupData[question] = this.value.trim();
                     checkCompletion();
                 });
-                
-                // Carregar valor anterior se existir
-                const voterId = localStorage.getItem('voterId');
-                if (voterId) {
-                    fetchData().then(data => {
-                        if (data.evaluations[voterId] && 
-                            data.evaluations[voterId][groups[currentGroupIndex].id] && 
-                            data.evaluations[voterId][groups[currentGroupIndex].id][textarea.dataset.question]) {
-                            textarea.value = data.evaluations[voterId][groups[currentGroupIndex].id][textarea.dataset.question];
-                            currentGroupData[textarea.dataset.question] = textarea.value;
-                            checkCompletion();
-                        }
-                    });
-                }
             });
 
             const nextBtn = document.getElementById('next-btn');
             nextBtn.addEventListener('click', async function() {
-                await saveEvaluation();
+                console.log('💾 Salvando avaliação do grupo:', groups[currentGroupIndex].name);
+                console.log('📋 Dados a salvar:', currentGroupData);
                 
-                if (currentGroupIndex < groups.length - 1) {
-                    currentGroupIndex++;
-                    renderEvaluationForm();
-                } else {
-                    showNotification('Avaliação concluída! Obrigado pela participação.', 'success');
-                    switchTab('results');
+                const saved = await saveEvaluation();
+                
+                if (saved) {
+                    if (currentGroupIndex < groups.length - 1) {
+                        currentGroupIndex++;
+                        currentGroupData = {}; // LIMPAR dados ao avançar
+                        renderEvaluationForm();
+                    } else {
+                        showNotification('Avaliação concluída! Obrigado pela participação.', 'success');
+                        switchTab('results');
+                    }
                 }
             });
 
@@ -1012,6 +1214,26 @@
             console.log('🔑 Chaves de avaliadores:', evaluatorsKeys);
             console.log('✅ TOTAL DE AVALIADORES:', uniqueEvaluators);
             
+            // Mostrar informações de debug na tela
+            const debugData = document.getElementById('debug-data');
+            if (debugData) {
+                debugData.innerHTML = `
+                    <div style="background: white; padding: 1rem; border-radius: 8px; margin-bottom: 0.5rem;">
+                        <strong>🔗 BIN ID:</strong> ${JSONBIN_CONFIG.BIN_ID}
+                    </div>
+                    <div style="background: white; padding: 1rem; border-radius: 8px; margin-bottom: 0.5rem;">
+                        <strong>👥 Total de Avaliadores Detectados:</strong> <span style="color: #667eea; font-size: 1.5rem; font-weight: bold;">${uniqueEvaluators}</span>
+                    </div>
+                    <div style="background: white; padding: 1rem; border-radius: 8px; margin-bottom: 0.5rem;">
+                        <strong>🔑 IDs dos Avaliadores:</strong><br>
+                        ${evaluatorsKeys.map(key => `<div style="margin-left: 1rem; color: #6b7280;">• ${key}</div>`).join('')}
+                    </div>
+                    <div style="background: white; padding: 1rem; border-radius: 8px;">
+                        <strong>🕐 Última Atualização:</strong> ${new Date().toLocaleString('pt-BR')}
+                    </div>
+                `;
+            }
+            
             // Recarregar avaliações por grupo
             await loadAllEvaluations();
             
@@ -1078,6 +1300,12 @@
             
             console.log('✨ Atualização completa!');
         }
+
+        // Função global para forçar reload
+        window.forceReloadData = async function() {
+            showNotification('Recarregando dados...', 'success');
+            await updateResults();
+        };
 
         function renderSuggestions(data, results) {
             const suggestionsContainer = document.getElementById('suggestions-list');
