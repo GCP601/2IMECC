@@ -44,6 +44,33 @@
             text-align: center;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
             margin-bottom: 2rem;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo-container {
+            position: absolute;
+            left: 2.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 250px;
+            height: 260px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        
+        .header-content {
+            flex: 1;
+            text-align: center;
         }
         
         h1 {
@@ -523,6 +550,20 @@
                 padding: 1.5rem;
                 border-radius: 12px;
                 margin-bottom: 1rem;
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .logo-container {
+                position: relative;
+                left: auto;
+                top: auto;
+                transform: none;
+                margin-bottom: 1rem;
+            }
+            
+            .header-content {
+                width: 100%;
             }
             
             h1 {
@@ -747,8 +788,14 @@
 <body>
     <div class="container">
         <header>
-            <h1><i class="fas fa-graduation-cap"></i> Avaliação de Apresentações</h1>
-            <p class="subtitle">Banca do Curso de Mecatrônica - 12 Grupos</p>
+            <div class="logo-container">
+                <!-- Substitua o src pelo caminho correto da sua logo -->
+                <img src="senai-logo.svg" width="1500" height="1200" alt="Logo SENAI" class="logo">
+            </div>
+            <div class="header-content">
+                <h1><i class="fas fa-graduation-cap"></i> Avaliação</h1>
+                <p class="subtitle">Curso de Mecatrônica - 2IMEC A</p>
+            </div>
         </header>
         
         <div class="tabs">
@@ -1085,366 +1132,124 @@
             });
             
             html += `
-                    <div class="action-buttons">
-                        ${currentGroupIndex > 0 ? 
-                            '<button class="btn btn-secondary" id="prev-btn"><i class="fas fa-arrow-left"></i> Anterior</button>' : 
-                            '<div></div>'}
-                        <button class="btn btn-primary" id="next-btn" disabled>
-                            ${currentGroupIndex < groups.length - 1 ? 
-                                'Próximo <i class="fas fa-arrow-right"></i>' : 
-                                'Finalizar <i class="fas fa-check"></i>'}
-                        </button>
-                    </div>
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" onclick="previousGroup()" ${currentGroupIndex === 0 ? 'disabled' : ''}>
+                        <i class="fas fa-arrow-left"></i> Grupo Anterior
+                    </button>
+                    <button class="btn btn-primary" onclick="nextGroup()" id="next-btn">
+                        ${currentGroupIndex === groups.length - 1 ? 'Finalizar Avaliação' : 'Próximo Grupo'} <i class="fas fa-arrow-right"></i>
+                    </button>
                 </div>
+            </div>
             `;
             
             document.getElementById('evaluation-form').innerHTML = html;
-            updateProgress();
             attachEventListeners();
+            updateProgress();
         }
 
         function attachEventListeners() {
+            // Botões de avaliação
             document.querySelectorAll('.rating-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    const question = this.dataset.question;
-                    const value = this.dataset.value;
+                    const question = this.getAttribute('data-question');
+                    const value = parseInt(this.getAttribute('data-value'));
                     
-                    document.querySelectorAll(`[data-question="${question}"]`).forEach(b => {
+                    document.querySelectorAll(`.rating-btn[data-question="${question}"]`).forEach(b => {
                         b.classList.remove('selected');
                     });
                     this.classList.add('selected');
-                    currentGroupData[question] = parseInt(value);
-                    checkCompletion();
-                });
-            });
-
-            document.querySelectorAll('.star').forEach(star => {
-                star.addEventListener('click', function() {
-                    const question = this.dataset.question;
-                    const value = parseInt(this.dataset.value);
-                    
-                    document.querySelectorAll(`[data-question="${question}"]`).forEach((s, i) => {
-                        if (i < value) {
-                            s.classList.add('active');
-                        } else {
-                            s.classList.remove('active');
-                        }
-                    });
                     
                     currentGroupData[question] = value;
-                    checkCompletion();
+                    console.log(`📝 ${question}: ${value}`);
                 });
             });
-
+            
+            // Estrelas
+            document.querySelectorAll('.star').forEach(star => {
+                star.addEventListener('click', function() {
+                    const question = this.getAttribute('data-question');
+                    const value = parseInt(this.getAttribute('data-value'));
+                    
+                    document.querySelectorAll(`.star[data-question="${question}"]`).forEach(s => {
+                        s.classList.remove('active');
+                    });
+                    
+                    for (let i = 1; i <= value; i++) {
+                        document.querySelector(`.star[data-question="${question}"][data-value="${i}"]`).classList.add('active');
+                    }
+                    
+                    currentGroupData[question] = value;
+                    console.log(`📝 ${question}: ${value} estrelas`);
+                });
+            });
+            
+            // Escala numérica
             document.querySelectorAll('.scale-number').forEach(num => {
                 num.addEventListener('click', function() {
-                    const question = this.dataset.question;
-                    const value = this.dataset.value;
+                    const question = this.getAttribute('data-question');
+                    const value = parseInt(this.getAttribute('data-value'));
                     
-                    document.querySelectorAll(`[data-question="${question}"]`).forEach(n => {
+                    document.querySelectorAll(`.scale-number[data-question="${question}"]`).forEach(n => {
                         n.classList.remove('selected');
                     });
                     this.classList.add('selected');
-                    currentGroupData[question] = parseInt(value);
-                    checkCompletion();
+                    
+                    currentGroupData[question] = value;
+                    console.log(`📝 ${question}: ${value}`);
                 });
             });
-
+            
+            // Textarea
             document.querySelectorAll('textarea').forEach(textarea => {
                 textarea.addEventListener('input', function() {
-                    const question = this.dataset.question;
-                    currentGroupData[question] = this.value.trim();
-                    checkCompletion();
+                    const question = this.getAttribute('data-question');
+                    currentGroupData[question] = this.value;
+                    console.log(`📝 ${question}: "${this.value}"`);
                 });
             });
+        }
 
-            const nextBtn = document.getElementById('next-btn');
-            nextBtn.addEventListener('click', async function() {
-                console.log('💾 Salvando avaliação do grupo:', groups[currentGroupIndex].name);
-                console.log('📋 Dados a salvar:', currentGroupData);
-                
-                const saved = await saveEvaluation();
-                
-                if (saved) {
-                    if (currentGroupIndex < groups.length - 1) {
-                        currentGroupIndex++;
-                        currentGroupData = {}; // LIMPAR dados ao avançar
-                        renderEvaluationForm();
-                    } else {
-                        showNotification('Avaliação concluída! Obrigado pela participação.', 'success');
-                        switchTab('results');
-                    }
-                }
-            });
-
-            const prevBtn = document.getElementById('prev-btn');
-            if (prevBtn) {
-                prevBtn.addEventListener('click', function() {
-                    currentGroupIndex--;
-                    renderEvaluationForm();
-                });
+        function previousGroup() {
+            if (currentGroupIndex > 0) {
+                currentGroupIndex--;
+                renderEvaluationForm();
             }
         }
 
-        function checkCompletion() {
-            // Verificar se todas as perguntas obrigatórias foram respondidas
-            const requiredQuestions = questions.filter(q => q.id !== 'q6'); // q6 (texto) é opcional
-            const allRequiredAnswered = requiredQuestions.every(q => 
-                currentGroupData[q.id] !== undefined && currentGroupData[q.id] !== ''
-            );
+        async function nextGroup() {
+            // Verificar se todas as perguntas foram respondidas
+            const unanswered = questions.filter(q => {
+                if (q.id === 'q6') return false; // q6 é opcional
+                return currentGroupData[q.id] === undefined;
+            });
             
-            document.getElementById('next-btn').disabled = !allRequiredAnswered;
+            if (unanswered.length > 0) {
+                showNotification(`Por favor, responda todas as perguntas antes de continuar.`, 'error');
+                return;
+            }
+            
+            // Salvar avaliação atual
+            const success = await saveEvaluation();
+            if (!success) {
+                showNotification('Erro ao salvar. Tente novamente.', 'error');
+                return;
+            }
+            
+            // Avançar para o próximo grupo ou finalizar
+            if (currentGroupIndex < groups.length - 1) {
+                currentGroupIndex++;
+                renderEvaluationForm();
+            } else {
+                showNotification('Avaliação finalizada com sucesso!', 'success');
+                showResults();
+            }
         }
 
         function updateProgress() {
-            const voterId = localStorage.getItem('voterId');
-            let completed = currentGroupIndex;
-            
-            const percentage = ((completed + 1) / groups.length) * 100;
-            document.getElementById('progress-bar').style.width = percentage + '%';
-            document.getElementById('progress-text').textContent = completed + 1;
-        }
-
-        function setupTabs() {
-            document.getElementById('evaluation-tab').addEventListener('click', () => switchTab('evaluation'));
-            document.getElementById('results-tab').addEventListener('click', () => switchTab('results'));
-        }
-
-        function switchTab(tab) {
-            if (tab === 'evaluation') {
-                document.getElementById('evaluation-tab').classList.add('active');
-                document.getElementById('results-tab').classList.remove('active');
-                document.getElementById('evaluation-form').style.display = 'block';
-                document.getElementById('results-container').style.display = 'none';
-            } else {
-                document.getElementById('results-tab').classList.add('active');
-                document.getElementById('evaluation-tab').classList.remove('active');
-                document.getElementById('evaluation-form').style.display = 'none';
-                document.getElementById('results-container').style.display = 'block';
-                updateResults();
-            }
-        }
-
-        async function updateResults() {
-            console.log('🔄 Iniciando atualização de resultados...');
-            
-            // Forçar reload dos dados do JSONBin
-            const data = await fetchData();
-            
-            console.log('📦 Estrutura completa dos dados:', data);
-            console.log('📋 Objeto evaluations:', data.evaluations);
-            
-            // Contar avaliadores de forma mais robusta
-            const evaluatorsKeys = Object.keys(data.evaluations || {});
-            const uniqueEvaluators = evaluatorsKeys.length;
-            
-            console.log('🔑 Chaves de avaliadores:', evaluatorsKeys);
-            console.log('✅ TOTAL DE AVALIADORES:', uniqueEvaluators);
-            
-            // Mostrar informações de debug na tela
-            const debugData = document.getElementById('debug-data');
-            if (debugData) {
-                debugData.innerHTML = `
-                    <div style="background: white; padding: 1rem; border-radius: 8px; margin-bottom: 0.5rem;">
-                        <strong>🔗 BIN ID:</strong> ${JSONBIN_CONFIG.BIN_ID}
-                    </div>
-                    <div style="background: white; padding: 1rem; border-radius: 8px; margin-bottom: 0.5rem;">
-                        <strong>👥 Total de Avaliadores Detectados:</strong> <span style="color: #667eea; font-size: 1.5rem; font-weight: bold;">${uniqueEvaluators}</span>
-                    </div>
-                    <div style="background: white; padding: 1rem; border-radius: 8px; margin-bottom: 0.5rem;">
-                        <strong>🔑 IDs dos Avaliadores:</strong><br>
-                        ${evaluatorsKeys.map(key => `<div style="margin-left: 1rem; color: #6b7280;">• ${key}</div>`).join('')}
-                    </div>
-                    <div style="background: white; padding: 1rem; border-radius: 8px;">
-                        <strong>🕐 Última Atualização:</strong> ${new Date().toLocaleString('pt-BR')}
-                    </div>
-                `;
-            }
-            
-            // Recarregar avaliações por grupo
-            await loadAllEvaluations();
-            
-            const results = groups.map(group => {
-                const evals = allEvaluations[group.id] || [];
-                let totalScore = 0;
-                let count = 0;
-                
-                evals.forEach(evaluation => {
-                    const q4 = evaluation.q4 || 0;
-                    const q5 = evaluation.q5 || 0;
-                    if (q4 > 0 && q5 > 0) {
-                        totalScore += (q4 + q5) / 2;
-                        count++;
-                    }
-                });
-                
-                const average = count > 0 ? (totalScore / count).toFixed(2) : 0;
-                
-                return {
-                    id: group.id,
-                    name: group.name,
-                    project: group.project,
-                    average: parseFloat(average),
-                    count: count
-                };
-            });
-            
-            results.sort((a, b) => b.average - a.average);
-            
-            const totalEvaluations = results.reduce((sum, r) => sum + r.count, 0);
-            const overallAverage = totalEvaluations > 0 
-                ? (results.reduce((sum, r) => sum + (r.average * r.count), 0) / totalEvaluations).toFixed(2)
-                : 0;
-            
-            // Atualizar FORÇADAMENTE o display
-            const evaluatorsElement = document.getElementById('total-evaluators');
-            evaluatorsElement.textContent = uniqueEvaluators;
-            evaluatorsElement.style.animation = 'pulse 0.5s';
-            
-            console.log('💫 Display atualizado para:', uniqueEvaluators);
-            
-            document.getElementById('best-group').textContent = results[0]?.name || '-';
-            document.getElementById('best-score').textContent = results[0]?.average > 0 
-                ? `Nota: ${results[0].average.toFixed(2)}` 
-                : 'Sem avaliações';
-            document.getElementById('average-score').textContent = overallAverage;
-            
-            const resultsList = document.getElementById('results-list');
-            resultsList.innerHTML = results.map((result, index) => `
-                <tr>
-                    <td><span class="rank">${index + 1}º</span></td>
-                    <td><strong>${result.name}</strong></td>
-                    <td>${result.project}</td>
-                    <td><strong>${result.average.toFixed(2)}</strong></td>
-                    <td>${result.count}</td>
-                </tr>
-            `).join('');
-            
-            // Renderizar sugestões
-            renderSuggestions(data, results);
-            
-            updateChart(results);
-            
-            console.log('✨ Atualização completa!');
-        }
-
-        // Função global para forçar reload
-        window.forceReloadData = async function() {
-            showNotification('Recarregando dados...', 'success');
-            await updateResults();
-        };
-
-        function renderSuggestions(data, results) {
-            const suggestionsContainer = document.getElementById('suggestions-list');
-            let html = '';
-            
-            // Agrupar sugestões por grupo
-            results.forEach(result => {
-                const evals = allEvaluations[result.id] || [];
-                const suggestions = evals
-                    .map(e => e.q6)
-                    .filter(s => s && s.trim() !== '');
-                
-                if (suggestions.length > 0) {
-                    html += `
-                        <div class="suggestion-group">
-                            <div class="suggestion-group-title">
-                                <i class="fas fa-lightbulb"></i>
-                                ${result.name} - ${result.project}
-                            </div>
-                    `;
-                    
-                    suggestions.forEach(suggestion => {
-                        html += `
-                            <div class="suggestion-item">
-                                <div class="suggestion-text">"${suggestion}"</div>
-                            </div>
-                        `;
-                    });
-                    
-                    html += '</div>';
-                }
-            });
-            
-            if (html === '') {
-                html = '<div class="no-suggestions"><i class="fas fa-inbox"></i><br>Nenhuma sugestão registrada ainda.</div>';
-            }
-            
-            suggestionsContainer.innerHTML = html;
-        }
-
-        function updateChart(results) {
-            const ctx = document.getElementById('results-chart').getContext('2d');
-            
-            if (chart) {
-                chart.destroy();
-            }
-            
-            const labels = results.map(r => r.name);
-            const data = results.map(r => r.average);
-            
-            const colors = [
-                'rgba(102, 126, 234, 0.8)',
-                'rgba(118, 75, 162, 0.8)',
-                'rgba(16, 185, 129, 0.8)',
-                'rgba(245, 158, 11, 0.8)',
-                'rgba(239, 68, 68, 0.8)',
-                'rgba(59, 130, 246, 0.8)',
-                'rgba(236, 72, 153, 0.8)',
-                'rgba(34, 197, 94, 0.8)',
-                'rgba(251, 191, 36, 0.8)',
-                'rgba(168, 85, 247, 0.8)',
-                'rgba(20, 184, 166, 0.8)',
-                'rgba(249, 115, 22, 0.8)'
-            ];
-            
-            chart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Nota Média',
-                        data: data,
-                        backgroundColor: colors,
-                        borderRadius: 8,
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        title: {
-                            display: true,
-                            text: 'Ranking de Notas por Grupo',
-                            font: {
-                                size: 18,
-                                weight: '600'
-                            },
-                            padding: 20
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 5,
-                            ticks: {
-                                stepSize: 1
-                            },
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.05)'
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false
-                            }
-                        }
-                    }
-                }
-            });
+            const progress = Math.round((currentGroupIndex / groups.length) * 100);
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+            document.getElementById('progress-text').textContent = currentGroupIndex;
         }
 
         function showNotification(message, type) {
@@ -1457,14 +1262,278 @@
             
             setTimeout(() => {
                 notification.classList.remove('show');
-            }, 3000);
+            }, 4000);
         }
 
-        document.addEventListener('DOMContentLoaded', async function() {
-            initEvaluator();
+        async function showResults() {
+            // Atualizar dados antes de mostrar os resultados
             await loadAllEvaluations();
+            
+            // Atualizar estatísticas
+            document.getElementById('total-evaluators').textContent = Object.keys(allEvaluations).length;
+            
+            // Calcular médias e rankings
+            const groupScores = {};
+            const groupCounts = {};
+            
+            groups.forEach(group => {
+                const groupEvaluations = allEvaluations[group.id] || [];
+                groupCounts[group.id] = groupEvaluations.length;
+                
+                if (groupEvaluations.length > 0) {
+                    const totalScore = groupEvaluations.reduce((sum, evalData) => {
+                        // Calcular média das notas (q1 a q5)
+                        let scoreSum = 0;
+                        let scoreCount = 0;
+                        
+                        for (let i = 1; i <= 5; i++) {
+                            if (evalData[`q${i}`] !== undefined) {
+                                scoreSum += evalData[`q${i}`];
+                                scoreCount++;
+                            }
+                        }
+                        
+                        return sum + (scoreCount > 0 ? scoreSum / scoreCount : 0);
+                    }, 0);
+                    
+                    groupScores[group.id] = totalScore / groupEvaluations.length;
+                } else {
+                    groupScores[group.id] = 0;
+                }
+            });
+            
+            // Encontrar grupo com maior pontuação
+            let bestGroupId = null;
+            let bestScore = 0;
+            
+            for (const groupId in groupScores) {
+                if (groupScores[groupId] > bestScore) {
+                    bestScore = groupScores[groupId];
+                    bestGroupId = groupId;
+                }
+            }
+            
+            const bestGroup = groups.find(g => g.id == bestGroupId);
+            document.getElementById('best-group').textContent = bestGroup ? bestGroup.name : '-';
+            document.getElementById('best-score').textContent = `Nota: ${bestScore.toFixed(1)}`;
+            
+            // Calcular média geral
+            const totalScore = Object.values(groupScores).reduce((sum, score) => sum + score, 0);
+            const averageScore = totalScore / Object.keys(groupScores).length;
+            document.getElementById('average-score').textContent = averageScore.toFixed(1);
+            
+            // Atualizar tabela de resultados
+            const resultsList = document.getElementById('results-list');
+            resultsList.innerHTML = '';
+            
+            const sortedGroups = [...groups].sort((a, b) => groupScores[b.id] - groupScores[a.id]);
+            
+            sortedGroups.forEach((group, index) => {
+                const score = groupScores[group.id] || 0;
+                const count = groupCounts[group.id] || 0;
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><span class="rank">${index + 1}º</span></td>
+                    <td>${group.name}</td>
+                    <td>${group.project}</td>
+                    <td><strong>${score.toFixed(1)}</strong></td>
+                    <td>${count}</td>
+                `;
+                resultsList.appendChild(row);
+            });
+            
+            // Atualizar gráfico
+            updateChart(groupScores);
+            
+            // Atualizar sugestões
+            updateSuggestions();
+            
+            // Atualizar dados de debug
+            updateDebugData();
+            
+            // Alternar para a aba de resultados
+            document.getElementById('evaluation-tab').classList.remove('active');
+            document.getElementById('results-tab').classList.add('active');
+            document.getElementById('evaluation-form').style.display = 'none';
+            document.getElementById('results-container').style.display = 'block';
+        }
+
+        function updateChart(groupScores) {
+            const ctx = document.getElementById('results-chart').getContext('2d');
+            
+            if (chart) {
+                chart.destroy();
+            }
+            
+            const labels = groups.map(g => g.name);
+            const data = groups.map(g => groupScores[g.id] || 0);
+            
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Nota Média',
+                        data: data,
+                        backgroundColor: '#3b82f6',
+                        borderColor: '#1e40af',
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        maxBarThickness: 40
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Desempenho dos Grupos',
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 5,
+                            ticks: {
+                                stepSize: 1
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateSuggestions() {
+            const suggestionsList = document.getElementById('suggestions-list');
+            suggestionsList.innerHTML = '';
+            
+            let hasSuggestions = false;
+            
+            groups.forEach(group => {
+                const groupEvaluations = allEvaluations[group.id] || [];
+                const groupSuggestions = [];
+                
+                groupEvaluations.forEach(evalData => {
+                    if (evalData.q6 && evalData.q6.trim() !== '') {
+                        groupSuggestions.push(evalData.q6);
+                    }
+                });
+                
+                if (groupSuggestions.length > 0) {
+                    hasSuggestions = true;
+                    
+                    const groupElement = document.createElement('div');
+                    groupElement.className = 'suggestion-group';
+                    
+                    let html = `
+                        <div class="suggestion-group-title">
+                            <i class="fas fa-users"></i> ${group.name} - ${group.project}
+                            <span style="font-size: 0.9rem; color: var(--gray); margin-left: auto;">
+                                ${groupSuggestions.length} sugestão(ões)
+                            </span>
+                        </div>
+                    `;
+                    
+                    groupSuggestions.forEach(suggestion => {
+                        html += `
+                            <div class="suggestion-item">
+                                <div class="suggestion-text">"${suggestion}"</div>
+                            </div>
+                        `;
+                    });
+                    
+                    groupElement.innerHTML = html;
+                    suggestionsList.appendChild(groupElement);
+                }
+            });
+            
+            if (!hasSuggestions) {
+                suggestionsList.innerHTML = `
+                    <div class="no-suggestions">
+                        <i class="fas fa-comment-slash" style="font-size: 3rem; margin-bottom: 1rem; color: var(--gray);"></i>
+                        <p>Nenhuma sugestão de melhoria foi registrada ainda.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function updateDebugData() {
+            const debugData = document.getElementById('debug-data');
+            
+            let html = `
+                <div><strong>Total de Avaliadores:</strong> ${Object.keys(allEvaluations).length}</div>
+                <div><strong>Última Atualização:</strong> ${new Date().toLocaleString()}</div>
+                <div><strong>ID do Avaliador:</strong> ${localStorage.getItem('voterId')}</div>
+                <div style="margin-top: 10px;"><strong>Avaliações por Grupo:</strong></div>
+            `;
+            
+            groups.forEach(group => {
+                const count = allEvaluations[group.id] ? allEvaluations[group.id].length : 0;
+                html += `<div style="margin-left: 15px;">${group.name}: ${count} avaliação(ões)</div>`;
+            });
+            
+            debugData.innerHTML = html;
+        }
+
+        function forceReloadData() {
+            showNotification('Atualizando dados...', 'success');
+            loadAllEvaluations().then(() => {
+                updateDebugData();
+                showNotification('Dados atualizados com sucesso!', 'success');
+            });
+        }
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🚀 Inicializando sistema de avaliação...');
+            
+            // Inicializar avaliador
+            initEvaluator();
+            
+            // Carregar avaliações existentes
+            await loadAllEvaluations();
+            
+            // Renderizar formulário de avaliação
             renderEvaluationForm();
-            setupTabs();
+            
+            // Configurar tabs
+            document.getElementById('evaluation-tab').addEventListener('click', function() {
+                document.getElementById('evaluation-tab').classList.add('active');
+                document.getElementById('results-tab').classList.remove('active');
+                document.getElementById('evaluation-form').style.display = 'block';
+                document.getElementById('results-container').style.display = 'none';
+            });
+            
+            document.getElementById('results-tab').addEventListener('click', function() {
+                document.getElementById('results-tab').classList.add('active');
+                document.getElementById('evaluation-tab').classList.remove('active');
+                document.getElementById('evaluation-form').style.display = 'none';
+                document.getElementById('results-container').style.display = 'block';
+                showResults();
+            });
+            
+            console.log('✅ Sistema inicializado com sucesso!');
         });
     </script>
 </body>
